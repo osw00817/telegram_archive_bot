@@ -31,7 +31,7 @@ async function getList() {
         return acc;
       }, {});
       
-      let msg = "산지니 아카이브는 제보로 운영되고있습니다.\n제보봇: @PNU_archive_bot\n파일명: 과목명_교수명_과제또는자료제목\n\n\n";
+      let msg = "산지니 아카이브는 익명의 제보로 운영되고있습니다.\n제보봇: @PNU_archive_bot\n파일명: 과목명_교수명_과제또는자료제목\n※산지니 아카이브 구독자 외 사람들에게 공유를 금합니다.\n※오류사항은 따봉산지니에서 /report {신고내용} 으로 신고하실수있습니다.\n\n\n";
       for (const [course, entries] of Object.entries(organizedData)) {
         msg += `[${course}]\n`;
         entries.forEach(entry => {
@@ -77,7 +77,19 @@ bot.onText(/\/notice (.+)/, (msg, match) => {
   const chatId = msg.chat.id;
   const resp = match[1]; // the captured "whatever"
   
-  bot.sendMessage(process.env.CHANNEL_ID_ID,resp);
+  bot.sendMessage(process.env.CHANNEL_ID,resp);
+});
+
+// Matches "/echo [whatever]"
+bot.onText(/\/report (.+)/, (msg, match) => {
+  // 'msg' is the received Message from Telegram
+  // 'match' is the result of executing the regexp above on the text content
+  // of the message
+
+  const chatId = msg.chat.id;
+  const resp = match[1]; // the captured "whatever"
+  
+  bot.sendMessage(process.env.LOG_ID,`[신고]\n${resp}`);
 });
 
 // Listen for any kind of message. There are different kinds of
@@ -164,7 +176,7 @@ bot.on('message', async (msg) => {
                     userStates[username].state = 'TLQKF';
                   });
             } else {
-                bot.sendMessage(msg.chat.id,`파일명을 과목명_교수명_제목 으로 입력해주세요`);
+                bot.sendMessage(msg.chat.id,`파일명을 과목명_교수명_제목 으로 해주세요.`);
             }
           } else {
             bot.sendMessage(msg.chat.id,"파일 형식으로 보내주세요.");
