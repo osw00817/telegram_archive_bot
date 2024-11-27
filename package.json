@@ -4,7 +4,8 @@
   "description": "telegram_archive_bot for PNU CSE",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "strat" : "node index.js"
   },
   "author": "osw00817",
   "license": "ISC",
