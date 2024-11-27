@@ -101,10 +101,12 @@ bot.on('message', async (msg) => {
       const {filename} = userStates[username];
       bot.sendMessage(process.env.CHANNEL_ID,`${filename}\n제보자 분의 한마디:${text}`);
       bot.sendMessage(msg.chat.id,"소중한 제보 감사드립니다.");
-
+      
       delete userStates[username];
       return;
-    } else if(msg.chat.id != process.env.CHANNEL_ID && msg.chat.id != process.env.LOG_ID) {
+    } 
+    
+    if(msg.chat.id != process.env.CHANNEL_ID && msg.chat.id != process.env.LOG_ID) {
         if(msg.document) {
             const regex = /^[^_]+_[^_]+_[^_]+$/;
             const filename = msg.document.file_name; 
