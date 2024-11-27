@@ -92,22 +92,26 @@ bot.on('message', async (msg) => {
         console.log(sentedmessage.message_id);
     })
     */
-
     const username = msg.chat.username || `${msg.chat.first_name}${msg.chat.last_name}`;
     const notice = 8;
+    
+    if (!userStates[username]) {
+      userStates[username] = { state: 'TLQKF' };
+    }
     
     if(userStates[username]?.state === 'await') {
       const text = msg.text;
       const {filename} = userStates[username];
       bot.sendMessage(process.env.CHANNEL_ID,`${filename}\n제보자 분의 한마디:${text}`);
       bot.sendMessage(msg.chat.id,"소중한 제보 감사드립니다.");
-      
+
       delete userStates[username];
       return;
     } 
     
     if(msg.chat.id != process.env.CHANNEL_ID && msg.chat.id != process.env.LOG_ID) {
-        if(msg.document) {
+        if(msg.document && userStates[username]?.state === 'TLQKF') {
+            userStates[username].state = 'TLQKFTLQKF';
             const regex = /^[^_]+_[^_]+_[^_]+$/;
             const filename = msg.document.file_name; 
             if(regex.test(filename)) {
@@ -120,7 +124,6 @@ bot.on('message', async (msg) => {
                 console.log(`과목명:${course}`);
                 console.log(`교수명:${professor}`);
                 console.log(`제목:${title}`);
-                bot.sendDocument(process.env.CHANNEL_ID,msg.document.file_id);
                 bot.sendMessage(process.env.LOG_ID, `${msg.chat.first_name}${msg.chat.last_name}(${msg.chat.username})이/가 ${filename}를 아카이브에 공유하셧습니다.`);
         
                 try {
@@ -136,20 +139,26 @@ bot.on('message', async (msg) => {
                   } finally {
                     await client.close();
                   }
-                
-                const notice_msg = await getList();
-                bot.editMessageText(`${notice_msg}`,{
-                    chat_id: process.env.CHANNEL_ID,
-                    message_id: notice
-                })
 
-                userStates[username] = {
-                  state: 'await',
-                  filename: filename,
-                };
-
-                bot.sendMessage(msg.chat.id,"제보자의 한마디를 입력해주세요.");
-                
+                  bot.sendDocument(process.env.CHANNEL_ID, msg.document.file_id)
+                  .then(() => {
+                    return getList();
+                  })
+                  .then((notice_msg) => {
+                    bot.editMessageText(`${notice_msg}`, {
+                      chat_id: process.env.CHANNEL_ID,
+                      message_id: notice,
+                    });
+                    userStates[username] = {
+                      state: 'await',
+                      filename: filename,
+                    };    
+                    bot.sendMessage(msg.chat.id,"제보자의 한마디를 입력해주세요.");
+                  })
+                  .catch((error) => {
+                    bot.sendMessage(process.env.LOG_ID,`${error}`);
+                    userStates[username].state = 'TLQKF';
+                  });
             } else {
                 bot.sendMessage(msg.chat.id,`파일명을 과목명_교수명_제목 으로 입력해주세요`);
             }
