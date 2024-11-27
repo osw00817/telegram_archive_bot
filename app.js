@@ -101,6 +101,10 @@ bot.on('message', async (msg) => {
     
     if(userStates[username]?.state === 'await') {
       const text = msg.text;
+      if(text == "X") {
+        delete userStates[username];
+        return;
+      }
       const {filename} = userStates[username];
       bot.sendMessage(process.env.CHANNEL_ID,`${filename}\n제보자 분의 한마디:${text}`);
       bot.sendMessage(msg.chat.id,"소중한 제보 감사드립니다.");
@@ -153,7 +157,7 @@ bot.on('message', async (msg) => {
                       state: 'await',
                       filename: filename,
                     };    
-                    bot.sendMessage(msg.chat.id,"제보자의 한마디를 입력해주세요.");
+                    bot.sendMessage(msg.chat.id,"제보자의 한마디를 입력해주세요.\n원치않으시면 대문자 X를 보내주세요.");
                   })
                   .catch((error) => {
                     bot.sendMessage(process.env.LOG_ID,`${error}`);
