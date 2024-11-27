@@ -5,14 +5,16 @@
   "main": "index.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "strat": "node index.js"
+    "start": "NODE_ENV=production PORT=80 pm2 start app.js -i 0",
+    "dev": "nodemon app"
   },
   "author": "osw00817",
   "license": "ISC",
   "dependencies": {
     "dotenv": "^16.4.5",
     "mongodb": "^6.11.0",
-    "node-telegram-bot-api": "^0.66.0"
+    "node-telegram-bot-api": "^0.66.0",
+    "pm2": "^5.4.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.7"
