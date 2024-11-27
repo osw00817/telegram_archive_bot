@@ -1,0 +1,14 @@
+{
+  "name": "telegram_archive_bot",
+  "version": "1.0.0",
+  "description": "telegram_archive_bot for PNU CSE",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "osw00817",
+  "license": "ISC",
+  "dependencies": {
+    "node-telegram-bot-api": "^0.66.0"
+  }
+}
