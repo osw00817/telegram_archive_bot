@@ -1,5 +1,59 @@
 const TelegramBot = require('node-telegram-bot-api');
+const { MongoClient, ServerApiVersion } = require('mongodb');
 require('dotenv').config();
+
+
+const uri = `mongodb+srv://SANJINI:${process.env.DB_PASSWORD}@cluster.dfgw5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster`;
+
+// Create a MongoClient with a MongoClientOptions object to set the Stable API version
+const client = new MongoClient(uri, {
+  serverApi: {
+    version: ServerApiVersion.v1,
+    strict: true,
+    deprecationErrors: true,
+  },
+});
+
+async function getList() {
+    try {
+      await client.connect();
+      const database = client.db("archive");
+      const collection = database.collection("archive_list");
+  
+      // Fetch all documents
+      const documents = await collection.find({}).toArray();
+  
+      // Organize by course
+      const organizedData = documents.reduce((acc, doc) => {
+        const { course, professor, title } = doc;
+        const entry = `${professor}_${title}`;
+        if (!acc[course]) {
+          acc[course] = [];
+        }
+        acc[course].push(entry);
+        return acc;
+      }, {});
+  
+      // Build the formatted message
+      let msg = "부산대 산지니는 익명의 제보로 운영되고있습니다.\n제보봇: @PNU_archive_bot\n파일명: 과목명_교수명_과제또는자료제목\n\n\n";
+      for (const [course, entries] of Object.entries(organizedData)) {
+        msg += `[${course}]\n`;
+        entries.forEach(entry => {
+          msg += `${entry}\n`;
+        });
+        msg += `\n`; // Add a blank line for separation
+      }
+  
+      //console.log(msg); // Log the message for verification
+      return msg;
+    } catch (error) {
+      console.error("Error fetching and organizing documents:", error);
+    } finally {
+      await client.close();
+    }
+  }
+
+
 // log 남기기
 
 /*
@@ -9,6 +63,7 @@ require('dotenv').config();
 
 */
 
+
 // replace the value below with the Telegram token you receive from @BotFather
 const token = process.env.BOT_TOKEN;
 
@@ -16,31 +71,69 @@ const token = process.env.BOT_TOKEN;
 const bot = new TelegramBot(token, {polling: true});
 
 // Matches "/echo [whatever]"
-bot.onText(/\/echo (.+)/, (msg, match) => {
+bot.onText(/\/notice (.+)/, (msg, match) => {
   // 'msg' is the received Message from Telegram
   // 'match' is the result of executing the regexp above on the text content
   // of the message
 
   const chatId = msg.chat.id;
   const resp = match[1]; // the captured "whatever"
-
-  // send back the matched "whatever" to the chat
-  bot.sendMessage(chatId, resp);
-  bot.sendMessage(-1002274686707, 'Hello World!');
+  bot.sendMessage(process.env.CHANNEL_ID,resp);
 });
 
 // Listen for any kind of message. There are different kinds of
 // messages.
-bot.on('message', (msg) => {
-  if(msg.document) {
-    console.log(msg.document.file_name);
-    bot.sendDocument(process.env.CHANNEL_ID,msg.document.file_id);
-    bot.sendMessage(process.env.LOG_ID, `${msg.chat.first_name}${msg.chat.last_name}(${msg.chat.username})이/가 ${msg.document.file_name}를 아카이브에 공유하셧습니다.`);
-  }
+bot.on('message', async (msg) => {
+    // 공지 메세지 추가
+    /*
+    bot.sendMessage(process.env.CHANNEL_ID, '공지 메세지').then((sentedmessage) => {
+        console.log(sentedmessage.message_id);
+    })
+    */
+    const notice = 61;
+    if(msg.chat.id != process.env.CHANNEL_ID) {
+        if(msg.document) {
+            const regex = /^[^_]+_[^_]+_[^_]+$/;
+            const filename = msg.document.file_name; 
+            if(regex.test(filename)) {
+                console.log(filename);
+                const parts = filename.split('_');
+                const course = parts[0];
+                const professor = parts[1];
+                const title = parts[2];
+        
+                console.log(`과목명:${course}`);
+                console.log(`교수명:${professor}`);
+                console.log(`제목:${title}`);
+                bot.sendDocument(process.env.CHANNEL_ID,msg.document.file_id);
+                bot.sendMessage(process.env.LOG_ID, `${msg.chat.first_name}${msg.chat.last_name}(${msg.chat.username})이/가 ${filename}를 아카이브에 공유하셧습니다.`);
+        
+                try {
+                    await client.connect();
+                    const database = client.db("archive");
+                    const collection = database.collection("archive_list");
+                
+                    const document = { course, professor, title };
+                    const result = await collection.insertOne(document);
+                    bot.sendMessage(process.env.LOG_ID,`${result.insertedId}로 db에 추가되었습니다.`);
+                  } catch (error) {
+                    bot.sendMessage(process.env.LOG_ID,`${error}`);
+                  } finally {
+                    await client.close();
+                  }
+                
+                const notice_msg = await getList();
+                bot.editMessageText(`${notice_msg}`,{
+                    chat_id: process.env.CHANNEL_ID,
+                    message_id: notice
+                })
+        
+                bot.sendMessage(msg.chat.id,"소중한 제보 감사드립니다.");
+            } else {
+                bot.sendMessage(msg.chat.id,`파일명을 과목명_교수명_제목 으로 입력해주세요`);
+            }
+          } else {
+            bot.sendMessage(msg.chat.id,"파일 형식으로 보내주세요.");
+          }
+    }
 });
-
-
-
-bot.on('file',(msg) => {
-    bot.sendMessage(chatId, `file`);
-})
