@@ -76,11 +76,15 @@ bot.onText(/\/notice (.+)/, (msg, match) => {
 
   const chatId = msg.chat.id;
   const resp = match[1]; // the captured "whatever"
-  bot.sendMessage(process.env.CHANNEL_ID,resp);
+  
+  bot.sendMessage(process.env.CHANNEL_ID_ID,resp);
 });
 
 // Listen for any kind of message. There are different kinds of
 // messages.
+
+const userStates = {};
+
 bot.on('message', async (msg) => {
     // 공지 메세지 추가
     /*
@@ -88,8 +92,19 @@ bot.on('message', async (msg) => {
         console.log(sentedmessage.message_id);
     })
     */
+
+    const username = msg.chat.username || `${msg.chat.first_name}${msg.chat.last_name}`;
     const notice = 8;
-    if(msg.chat.id != process.env.CHANNEL_ID && msg.chat.id != process.env.LOG_ID) {
+    
+    if(userStates[username]?.state === 'await') {
+      const text = msg.text;
+      const {filename} = userStates[username];
+      bot.sendMessage(process.env.CHANNEL_ID,`${filename}\n제보자 분의 한마디:${text}`);
+      bot.sendMessage(msg.chat.id,"소중한 제보 감사드립니다.");
+
+      delete userStates[username];
+      return;
+    } else if(msg.chat.id != process.env.CHANNEL_ID && msg.chat.id != process.env.LOG_ID) {
         if(msg.document) {
             const regex = /^[^_]+_[^_]+_[^_]+$/;
             const filename = msg.document.file_name; 
@@ -125,8 +140,14 @@ bot.on('message', async (msg) => {
                     chat_id: process.env.CHANNEL_ID,
                     message_id: notice
                 })
-        
-                bot.sendMessage(msg.chat.id,"소중한 제보 감사드립니다.");
+
+                userStates[username] = {
+                  state: 'await',
+                  filename: filename,
+                };
+
+                bot.sendMessage(msg.chat.id,"제보자의 한마디를 입력해주세요.");
+                
             } else {
                 bot.sendMessage(msg.chat.id,`파일명을 과목명_교수명_제목 으로 입력해주세요`);
             }
