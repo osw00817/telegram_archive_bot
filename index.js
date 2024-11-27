@@ -26,16 +26,16 @@ async function getList() {
       // Organize by course
       const organizedData = documents.reduce((acc, doc) => {
         const { course, professor, title } = doc;
-        const entry = `${professor}_${title}`;
+        const entry = `${course}_${professor}_${title}`;
         if (!acc[course]) {
           acc[course] = [];
         }
         acc[course].push(entry);
         return acc;
       }, {});
-  
+      
       // Build the formatted message
-      let msg = "부산대 산지니는 익명의 제보로 운영되고있습니다.\n제보봇: @PNU_archive_bot\n파일명: 과목명_교수명_과제또는자료제목\n\n\n";
+      let msg = "산지니 아카이브는 제보로 운영되고있습니다.\n제보봇: @PNU_archive_bot\n파일명: 과목명_교수명_과제또는자료제목\n\n\n";
       for (const [course, entries] of Object.entries(organizedData)) {
         msg += `[${course}]\n`;
         entries.forEach(entry => {
@@ -43,7 +43,9 @@ async function getList() {
         });
         msg += `\n`; // Add a blank line for separation
       }
-  
+      msg += `\n`;
+      msg += `\n`;
+
       //console.log(msg); // Log the message for verification
       return msg;
     } catch (error) {
@@ -90,7 +92,7 @@ bot.on('message', async (msg) => {
         console.log(sentedmessage.message_id);
     })
     */
-    const notice = 61;
+    const notice = 8;
     if(msg.chat.id != process.env.CHANNEL_ID) {
         if(msg.document) {
             const regex = /^[^_]+_[^_]+_[^_]+$/;
