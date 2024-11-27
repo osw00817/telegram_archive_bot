@@ -1,7 +1,12 @@
 const TelegramBot = require('node-telegram-bot-api');
 
+
+// log 남기기
+// file handling
+// list 
+
 // replace the value below with the Telegram token you receive from @BotFather
-const token = 'YOUR_TELEGRAM_BOT_TOKEN';
+const token = '7668501773:AAFYORZyVJfeXkPH3OTArsu0GhvvjP8wJ_A';
 
 // Create a bot that uses 'polling' to fetch new updates
 const bot = new TelegramBot(token, {polling: true});
@@ -17,13 +22,20 @@ bot.onText(/\/echo (.+)/, (msg, match) => {
 
   // send back the matched "whatever" to the chat
   bot.sendMessage(chatId, resp);
+  bot.sendMessage(-1002274686707, 'Hello World!');
 });
 
 // Listen for any kind of message. There are different kinds of
 // messages.
 bot.on('message', (msg) => {
   const chatId = msg.chat.id;
-
+  console.log(msg.chat.id);
   // send a message to the chat acknowledging receipt of their message
-  bot.sendMessage(chatId, 'Received your message');
+  bot.sendMessage(chatId, `${msg.chat}`);
+  //bot.sendMessage(-1002274686707, "test");
+ // bot.sendDocument(-1002274686707,"");
 });
+
+bot.on('file',(msg) => {
+    bot.sendMessage(chatId, `file`);
+})
