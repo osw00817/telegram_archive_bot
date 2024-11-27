@@ -5,7 +5,6 @@ require('dotenv').config();
 
 const uri = `mongodb+srv://SANJINI:${process.env.DB_PASSWORD}@cluster.dfgw5.mongodb.net/?retryWrites=true&w=majority&appName=Cluster`;
 
-// Create a MongoClient with a MongoClientOptions object to set the Stable API version
 const client = new MongoClient(uri, {
   serverApi: {
     version: ServerApiVersion.v1,
@@ -20,10 +19,8 @@ async function getList() {
       const database = client.db("archive");
       const collection = database.collection("archive_list");
   
-      // Fetch all documents
       const documents = await collection.find({}).toArray();
   
-      // Organize by course
       const organizedData = documents.reduce((acc, doc) => {
         const { course, professor, title } = doc;
         const entry = `${course}_${professor}_${title}`;
@@ -34,19 +31,18 @@ async function getList() {
         return acc;
       }, {});
       
-      // Build the formatted message
       let msg = "산지니 아카이브는 제보로 운영되고있습니다.\n제보봇: @PNU_archive_bot\n파일명: 과목명_교수명_과제또는자료제목\n\n\n";
       for (const [course, entries] of Object.entries(organizedData)) {
         msg += `[${course}]\n`;
         entries.forEach(entry => {
           msg += `${entry}\n`;
         });
-        msg += `\n`; // Add a blank line for separation
+        msg += `\n`;
       }
       msg += `\n`;
       msg += `\n`;
 
-      //console.log(msg); // Log the message for verification
+      //console.log(msg);
       return msg;
     } catch (error) {
       console.error("Error fetching and organizing documents:", error);
@@ -93,7 +89,7 @@ bot.on('message', async (msg) => {
     })
     */
     const notice = 8;
-    if(msg.chat.id != process.env.CHANNEL_ID) {
+    if(msg.chat.id != process.env.CHANNEL_ID && msg.chat.id != process.env.LOG_ID) {
         if(msg.document) {
             const regex = /^[^_]+_[^_]+_[^_]+$/;
             const filename = msg.document.file_name; 
