@@ -31,7 +31,7 @@ async function getList() {
         return acc;
       }, {});
       
-      let msg = "[공지사항]\n\n산지니 아카이브는 익명의 제보로 운영되고있습니다.\n제보봇: @PNU_archive_bot\n파일명: 과목명_교수명_자료제목\n※산지니 아카이브 구독자 외 사람들에게 공유를 금합니다.\n※파일 제보 및 문제 신고 방법은 따봉산지니에서 /help 명령어를 통해 확인하실수있습니다.\n\n\n";
+      let msg = "[공지사항]\n\n산지니 아카이브는 익명의 제보로 운영되고있습니다.\n제보봇: @PNU_archive_bot\n파일명: 과목명_교수명_자료제목\n※산지니 아카이브 구독자 외 사람들에게 공유를 금합니다.\n※파일 제보 및 문제 신고 방법은 따봉산지니에서 /help 명령어를 통해 확인하실수있습니다.\n\n";
       for (const [course, entries] of Object.entries(organizedData)) {
         msg += `[${course}]\n`;
         entries.forEach(entry => {
