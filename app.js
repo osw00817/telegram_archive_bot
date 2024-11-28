@@ -91,7 +91,7 @@ bot.onText(/\/submit (.+)/, (msg, match) => {
     };
     bot.sendMessage(msg.chat.id,`제보자의 한마디를 입력해주세요.\n입력을 원치 않으시면 대문자 X를 입력해주세요.`);
   } else {
-    bot.sendMessage(msg.chat.id,`/submit 과목명_교수명_파일명\n확인 부탁드립니다.`);
+    bot.sendMessage(msg.chat.id,`과목명_교수명_파일명\n형식 확인 부탁드립니다.`);
   }
 });
 
