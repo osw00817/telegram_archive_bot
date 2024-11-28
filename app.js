@@ -121,6 +121,7 @@ bot.on('message', async (msg) => {
     if(msg.document && userStates[username]?.state === 'TLQKFTLQKF') {
       userStates[username] === 'TLQKFTLQKFTLQKF';
       const {filename,comment} = userStates[username];
+      delete userStates[username];
       console.log(filename);
 
       const parts = filename.split('_');
@@ -161,14 +162,13 @@ bot.on('message', async (msg) => {
             chat_id: process.env.CHANNEL_ID,
             message_id: notice,
           });
-          delete userStates[username];
+         
           if(comment != "X"){
             bot.sendMessage(process.env.CHANNEL_ID,`제보자의 한마디:${comment}`);
           }
           bot.sendMessage(msg.chat.id,"소중한 제보 감사드립니다.");
         })
         .catch((error) => {
-          delete userStates[username];
           bot.sendMessage(process.env.LOG_ID,`${error}`);
           bot.sendMessage(msg.chat.id,"오류가 발생하였습니다. 죄송합니다.");
         });
