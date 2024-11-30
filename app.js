@@ -135,7 +135,7 @@ bot.on('message', async (msg) => {
 
       // 개발용 로그 
       bot.sendMessage(process.env.LOG_ID, `${filename}를 아카이브에 되었습니다.`);
-      
+
       //database에 목록 추가
       try {
           await client.connect();
@@ -174,5 +174,6 @@ bot.on('message', async (msg) => {
     }
     else if(userStates[username]?.state === 'TLQKFTLQKF') {
       bot.sendMessage(msg.chat.id,"파일 형식으로 보내지 않아 취소되었습니다.\n 제보를 원하실경우, 처음부터 다시해주세요.");
+      delete userStates[username];
     }
 });
